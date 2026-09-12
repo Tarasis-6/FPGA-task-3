@@ -65,12 +65,14 @@ end
         check_transition(dut.CODE0, dut.WAIT_D2,  "digit1 correct");
         check_transition(dut.CODE1, dut.WAIT_D3,  "digit2 correct");
         check_transition(dut.CODE2, dut.UNLOCKED, "digit3 correct");
-        if (unlocked_led === 1'b1)
+
+        // ---- Reset before the error scenario ----
+        @(negedge clk);@(negedge clk);
+                if (unlocked_led === 1'b1)
             $display("[%0t ns] PASS: unlocked_led=1 after correct sequence", $time);
         else
             $display("[%0t ns] FAIL: unlocked_led expected 1, got %0b", $time, unlocked_led);
 
-        // ---- Reset before the error scenario ----
         rst = 1; digit_in = 4'd0;
         @(negedge clk);@(negedge clk);@(negedge clk);
         rst = 0;
@@ -79,6 +81,9 @@ end
         check_transition(dut.CODE0,     dut.WAIT_D2, "digit1 correct");
         check_transition(dut.CODE1,     dut.WAIT_D3, "digit2 correct");
         check_transition(dut.CODE1 + 3, dut.LOCKED,  "digit2 WRONG -> reset to LOCKED");
+        check_transition(dut.CODE0,     dut.WAIT_D2, "digit1 correct");
+        check_transition(dut.CODE1,     dut.WAIT_D3, "digit2 correct");
+        check_transition(dut.CODE2+4,   dut.WAIT_D3, "digit2 WRONG -> reset to LOCKED");
 
         $display("[%0t ps] Simulation finished", $time);
         $finish;
